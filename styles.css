@@ -1,0 +1,424 @@
+/* =========================================================
+   COLOURS AND GLOBAL STYLES
+   Shared colour values and the base page defaults
+========================================================= */
+:root {
+    --ink: #111111;
+    --paper: #fffdf6;
+    --pink: #ff2f92;
+    --lime: #c8ff00;
+    --yellow: #ffd400;
+    --blue: #2457ff;
+    --purple: #7b2cff;
+    --red: #ef3340;
+    --green: #00a878;
+    --line: #171717;
+    --muted: #5e5e5e
+}
+
+* {
+    box-sizing: border-box
+}
+
+/* =========================================================
+   PAGE LAYOUT
+   Overall page width and background
+========================================================= */
+body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font: 15px/1.45 Arial, Helvetica, sans-serif;
+    background-image: radial-gradient(circle at 8% 8%, #ff2f9214 0 90px, transparent 92px), radial-gradient(circle at 92% 18%, #c8ff0024 0 130px, transparent 132px)
+}
+
+.wrap {
+    max-width: 1460px;
+    margin: auto;
+    padding: 24px
+}
+
+/* =========================================================
+   HEADER / HERO
+   Main dashboard banner and its title
+========================================================= */
+.hero {
+    position: relative;
+    overflow: hidden;
+    background: var(--ink);
+    color: #fff;
+    padding: 30px 32px;
+    border: 3px solid var(--ink);
+    border-radius: 24px;
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+    box-shadow: 8px 8px 0 var(--pink)
+}
+
+.hero:after {
+    content: "FOR THE FUN OF IT.";
+    position: absolute;
+    right: -18px;
+    bottom: -12px;
+    font-size: 42px;
+    font-weight: 1000;
+    color: #ffffff14;
+    letter-spacing: -2px;
+    transform: rotate(-4deg)
+}
+
+.eyebrow {
+    display: inline-block;
+    background: var(--lime);
+    color: var(--ink);
+    padding: 5px 10px;
+    border-radius: 99px;
+    font-weight: 1000;
+    letter-spacing: 1.6px;
+    font-size: 12px
+}
+
+.hero h1 {
+    margin: 10px 0 5px;
+    font-size: 36px;
+    line-height: 1;
+    letter-spacing: -1.5px;
+    text-transform: uppercase
+}
+
+.muted {
+    color: var(--muted)
+}
+
+.hero .muted {
+    color: #f3f3f3
+}
+
+/* =========================================================
+   BUTTONS
+   Refresh button appearance and hover state
+========================================================= */
+.btn {
+    position: relative;
+    z-index: 2;
+    background: var(--yellow);
+    color: var(--ink);
+    border: 2px solid #fff;
+    padding: 10px 14px;
+    border-radius: 99px;
+    font-weight: 900;
+    cursor: pointer;
+    box-shadow: 3px 3px 0 var(--pink)
+}
+
+.btn:hover {
+    transform: translate(-1px, -1px);
+    box-shadow: 5px 5px 0 var(--pink)
+}
+
+/* =========================================================
+   SUMMARY METRICS
+   Dashboard columns, metric boxes, and shared panels
+========================================================= */
+.summary,
+.cards,
+.grid {
+    display: grid;
+    gap: 16px;
+    margin-top: 18px
+}
+
+.summary {
+    grid-template-columns: repeat(3, 1fr)
+}
+
+.cards {
+    grid-template-columns: repeat(3, 1fr)
+}
+
+.grid {
+    grid-template-columns: 1fr 1fr
+}
+
+.box {
+    background: #fff;
+    border: 2px solid var(--line);
+    border-radius: 18px;
+    padding: 20px;
+    box-shadow: 5px 5px 0 #111
+}
+
+.metric:nth-child(1) {
+    background: var(--lime)
+}
+
+.metric:nth-child(2) {
+    background: #fff
+}
+
+.metric:nth-child(3) {
+    background: #ffd9e9
+}
+
+.metric:nth-child(4) {
+    background: #fff2a8
+}
+
+.metric b {
+    font-size: 34px;
+    line-height: 1;
+    display: block;
+    font-weight: 1000
+}
+
+/* =========================================================
+   MILESTONE CARDS
+   Milestone headings, risk labels, and progress summaries
+========================================================= */
+.mile {
+    border-top: 12px solid var(--pink)
+}
+
+.mile:nth-child(2) {
+    border-top-color: var(--blue)
+}
+
+.mile.bau {
+    border-top-color: var(--lime)
+}
+
+.head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 10px
+}
+
+.head h2,
+.head h3 {
+    margin: 0;
+    font-weight: 1000;
+    letter-spacing: -.4px
+}
+
+.risk,
+.pill {
+    padding: 6px 10px;
+    border: 2px solid var(--ink);
+    border-radius: 99px;
+    font-size: 11px;
+    font-weight: 1000;
+    background: #fff
+}
+
+.low {
+    background: var(--lime);
+    color: var(--ink)
+}
+
+.watch {
+    background: var(--yellow);
+    color: var(--ink)
+}
+
+.high {
+    background: var(--pink);
+    color: #fff
+}
+
+.score {
+    font-size: 44px;
+    font-weight: 1000;
+    margin-top: 12px;
+    letter-spacing: -2px
+}
+
+/* =========================================================
+   PROGRESS INDICATORS
+   Milestone progress tracks and small card metrics
+========================================================= */
+.progress,
+.track {
+    height: 17px;
+    background: #eee;
+    border: 2px solid var(--ink);
+    border-radius: 99px;
+    overflow: hidden
+}
+
+.progress i {
+    display: block;
+    height: 100%;
+    background: linear-gradient(90deg, var(--pink), var(--yellow), var(--lime))
+}
+
+.mini {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-top: 15px
+}
+
+.mini div {
+    background: #f7f7f7;
+    border: 1.5px solid var(--ink);
+    border-radius: 12px;
+    padding: 9px
+}
+
+.mini b {
+    font-size: 20px;
+    display: block;
+    font-weight: 1000
+}
+
+/* =========================================================
+   FILTERS / CHIPS
+   Clickable filters for the dashboard charts
+========================================================= */
+.chips {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin: 10px 0 18px
+}
+
+.chip {
+    border: 2px solid var(--ink);
+    background: #fff;
+    padding: 7px 13px;
+    border-radius: 99px;
+    font-weight: 900;
+    cursor: pointer;
+    box-shadow: 2px 2px 0 var(--ink)
+}
+
+.chip.on {
+    background: var(--pink);
+    color: #fff
+}
+
+.chip:hover {
+    transform: translateY(-1px)
+}
+
+/* =========================================================
+   CHARTS / BARS
+   Horizontal chart bars and their colored fills
+========================================================= */
+.bar {
+    display: grid;
+    grid-template-columns: 165px 1fr 38px;
+    gap: 9px;
+    align-items: center;
+    margin: 11px 0
+}
+
+.fill {
+    height: 100%;
+    border-radius: 99px
+}
+
+/* =========================================================
+   HEATMAPS
+   Milestone-by-type and milestone-by-priority grids
+========================================================= */
+.heat {
+    overflow: auto
+}
+
+.heat table {
+    width: 100%;
+    border-spacing: 7px
+}
+
+.heat th {
+    color: var(--muted);
+    font-size: 11px;
+    text-transform: uppercase
+}
+
+.heat td {
+    text-align: center;
+    padding: 16px;
+    border: 2px solid var(--ink);
+    border-radius: 10px;
+    font-weight: 1000
+}
+
+/* =========================================================
+   TRELLO LINKS
+   Link styling for cards listed in the data quality section
+========================================================= */
+a {
+    color: var(--blue);
+    font-weight: 900;
+    text-decoration-thickness: 2px
+}
+
+/* =========================================================
+   DATA QUALITY
+   Expandable issue rows and the loading error notice
+========================================================= */
+.issue {
+    border: 2px solid var(--ink);
+    border-radius: 12px;
+    margin: 10px 0;
+    overflow: hidden
+}
+
+.issue summary {
+    padding: 14px;
+    font-weight: 1000;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    background: #fafafa
+}
+
+.issue div {
+    padding: 9px 14px;
+    border-top: 1.5px solid var(--ink)
+}
+
+.notice {
+    display: none;
+    background: var(--yellow);
+    border: 2px solid var(--ink);
+    padding: 12px;
+    border-radius: 10px;
+    margin-top: 14px;
+    box-shadow: 4px 4px 0 var(--ink)
+}
+
+/* =========================================================
+   RESPONSIVE / MOBILE STYLES
+   Stack dashboard sections on narrower screens
+========================================================= */
+@media(max-width:900px) {
+    .summary {
+        grid-template-columns: 1fr 1fr
+    }
+
+    .cards,
+    .grid {
+        grid-template-columns: 1fr
+    }
+
+    .mini {
+        grid-template-columns: 1fr 1fr
+    }
+
+    .hero {
+        display: block
+    }
+
+    .hero>div:last-child {
+        margin-top: 18px
+    }
+
+    .hero h1 {
+        font-size: 29px
+    }
+}
