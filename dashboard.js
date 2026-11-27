@@ -121,7 +121,7 @@ function toggleType(v) {
 }
 
 function typeChips() {
-    let a = ['All', 'Hypercare', 'Bug', 'Feature', 'Optimization', 'Missing'];
+    let a = ['All', 'Hypercare', 'Bug', 'Feature', 'Optimization'];
     return '<div class="chips">' + a.map(x =>
         `<button class="chip ${(x === 'All' && !ys.length) || ys.includes(x) ? 'on' : ''}" onclick="toggleType('${x}')">${x}</button>`
     ).join('') + '</div>';
@@ -276,7 +276,7 @@ function card(n, a, b = false) {
    DATA QUALITY CHECKS
    Identify missing ticket details for the data quality section
 ========================================================= */
-function render() { let complete = C.filter(c => DONE.includes(c.status)).length, crit = C.filter(c => c.priority === 'Critical' && !DONE.includes(c.status)).length, mil = ms(), rows = [...mil, 'BAU'], ps = ['Critical', 'High', 'Medium', 'Low', 'Missing'], open = C.filter(c => !DONE.includes(c.status)), mat = rows.map(r => ps.map(p => open.filter(c => (r === 'BAU' ? bau(c) : c.m.includes(r)) && c.priority === p).length)), mx = Math.max(1, ...mat.flat()); document.getElementById('subtitle').textContent = (D.name || 'Trello board') + ' · ' + C.length + ' active tickets'; document.getElementById('updated').textContent = 'Last updated: ' + new Date(D.dateLastActivity || Date.now()).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' }); let checks = [['Missing Milestone', c => !c.m.length], ['Missing Stream', c => !c.s.length], ['Missing Type', c => !c.t.length], ['Missing Priority', c => c.priority === 'Missing'], ['Missing Owner', c => !c.owners.length]]; app.innerHTML = `<section class="summary"><div class="box metric"><b>${C.length}</b><span>Active tickets</span></div><div class="box metric"><b>${C.length - complete}</b><span>Remaining</span></div><div class="box metric"><b>${crit}</b><span>Critical open</span></div></section><section class="cards">${mil.map(m => card(m, C.filter(c => c.m.includes(m)))).join('')}${card('BAU Operations', C.filter(bau), true)}</section><section class="box" style="margin-top:18px"><div class="head"><div><h2>What kind of work remains?</h2><p class="muted">Open tickets by Ticket Type · use the filters to focus the work mix.</p></div><span class="pill high">${open.filter(c => types(c).includes('Hypercare')).length} Hypercare open</span></div>${typeChips()}${bars(open.filter(c => !ys.length || types(c).some(t => ys.includes(t))).flatMap(types))}<h2 style="margin-top:22px">Ticket Type by milestone</h2><div class="heat"><table><tr><th></th>${['Hypercare', 'Bug', 'Feature', 'Optimization'].map(t => `<th>${t}</th>`).join('')}</tr>${rows.map(r => `<tr><th>${esc(r)}</th>${['Hypercare', 'Bug', 'Feature', 'Optimization'].map((t, i) => `<td style="background:${['#ff2f92', '#ef3340', '#2457ff', '#c8ff00'][i]};color:${i === 3 ? '#111' : '#fff'}">${open.filter(c => (r === 'BAU' ? bau(c) : c.m.includes(r)) && types(c).includes(t)).length}</td>`).join('')}</tr>`).join('')}</table></div></section><div class="grid"><section class="box"><h2>Where is the work?</h2><p class="muted">Select one or more milestones.</p>${chips('s', ss)}${bars(C.filter(c => match(c, ss)).flatMap(c => c.s.length ? c.s : ['Missing']))}</section><section class="box"><h2>Where is the work in the process?</h2><p class="muted">Status follows Trello list order.</p>${chips('t', ts)}${bars(C.filter(c => match(c, ts)).map(c => c.status), ORDER)}</section></div><section class="box" style="margin-top:16px"><h2>Delivery risk by milestone</h2><p class="muted">Open work only · milestone × priority.</p><div class="heat"><table><tr><th></th>${ps.map(p => `<th>${p}</th>`).join('')}</tr>${rows.map((r, i) => `<tr><th>${r}</th>${ps.map((p, j) => { let n = mat[i][j], a = .12 + .78 * n / mx, col = p === 'Critical' ? `rgba(255,47,146,${a})` : p === 'High' ? `rgba(255,212,0,${a})` : `rgba(36,87,255,${a})`; return `<td style="background:${col}">${n}</td>` }).join('')}</tr>`).join('')}</table></div></section><section class="box" style="margin-top:16px"><h2>Data quality actions</h2><p class="muted">Open affected cards directly in Trello.</p>${checks.map(([n, f]) => { let a = C.filter(f); return `<details class="issue"><summary><span>${n}</span><span class="pill">${a.length}</span></summary>${a.map(c => `<div><a href="${esc(c.url)}" target="_blank">${esc(c.name)}</a><a href="${esc(c.url)}" target="_blank" style="float:right">Open in Trello ↗</a></div>`).join('')}</details>` }).join('')}</section>` }
+function render() { let complete = C.filter(c => DONE.includes(c.status)).length, crit = C.filter(c => c.priority === 'Critical' && !DONE.includes(c.status)).length, mil = ms(), rows = [...mil, 'BAU'], ps = ['Critical', 'High', 'Medium', 'Low'], open = C.filter(c => !DONE.includes(c.status)), excluded = open.filter(c => !c.m.length || c.priority === 'Missing').length, mat = rows.map(r => ps.map(p => open.filter(c => (r === 'BAU' ? bau(c) : c.m.includes(r)) && c.priority === p).length)), mx = Math.max(1, ...mat.flat()); document.getElementById('subtitle').textContent = (D.name || 'Trello board') + ' · ' + C.length + ' active tickets'; document.getElementById('updated').textContent = 'Last updated: ' + new Date(D.dateLastActivity || Date.now()).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' }); let checks = [['Missing Milestone', c => !c.m.length], ['Missing Stream', c => !c.s.length], ['Missing Type', c => !c.t.length], ['Missing Priority', c => c.priority === 'Missing'], ['Missing Owner', c => !c.owners.length]]; app.innerHTML = `<section class="summary"><div class="box metric"><b>${C.length}</b><span>Active tickets</span></div><div class="box metric"><b>${C.length - complete}</b><span>Remaining</span></div><div class="box metric"><b>${crit}</b><span>Critical open</span></div></section><section class="cards">${mil.map(m => card(m, C.filter(c => c.m.includes(m)))).join('')}${card('BAU Operations', C.filter(bau), true)}</section><section class="box" style="margin-top:18px"><div class="head"><div><h2>What kind of work remains?</h2><p class="muted">Open tickets by Ticket Type · use the filters to focus the work mix.</p></div><span class="pill high">${open.filter(c => types(c).includes('Hypercare')).length} Hypercare open</span></div>${typeChips()}${bars(open.filter(c => (!ys.length || types(c).some(t => ys.includes(t)))).flatMap(c => types(c).filter(t => t !== 'Missing')))}<h2 style="margin-top:22px">Ticket Type by milestone</h2><div class="heat"><table><tr><th></th>${['Hypercare', 'Bug', 'Feature', 'Optimization'].map(t => `<th>${t}</th>`).join('')}</tr>${rows.map(r => `<tr><th>${esc(r)}</th>${['Hypercare', 'Bug', 'Feature', 'Optimization'].map((t, i) => `<td style="background:${['#ff2f92', '#ef3340', '#2457ff', '#c8ff00'][i]};color:${i === 3 ? '#111' : '#fff'}">${open.filter(c => (r === 'BAU' ? bau(c) : c.m.includes(r)) && types(c).includes(t)).length}</td>`).join('')}</tr>`).join('')}</table></div></section><div class="grid"><section class="box"><h2>Where is the work?</h2><p class="muted">Select one or more milestones.</p>${chips('s', ss)}${bars(C.filter(c => match(c, ss)).flatMap(c => c.s.length ? c.s : ['Missing']))}</section><section class="box"><h2>Where is the work in the process?</h2><p class="muted">Status follows Trello list order.</p>${chips('t', ts)}${bars(C.filter(c => match(c, ts)).map(c => c.status), ORDER)}</section></div><section class="box" style="margin-top:16px"><h2>Delivery risk by milestone</h2><p class="muted">Open work only · milestone × priority.</p><p class="muted">${excluded} ${excluded === 1 ? 'ticket' : 'tickets'} excluded due to missing fields.</p><div class="heat"><table><tr><th></th>${ps.map(p => `<th>${p}</th>`).join('')}</tr>${rows.map((r, i) => `<tr><th>${r}</th>${ps.map((p, j) => { let n = mat[i][j], a = .12 + .78 * n / mx, col = p === 'Critical' ? `rgba(255,47,146,${a})` : p === 'High' ? `rgba(255,212,0,${a})` : `rgba(36,87,255,${a})`; return `<td style="background:${col}">${n}</td>` }).join('')}</tr>`).join('')}</table></div></section><section class="box" style="margin-top:16px"><h2>Data quality actions</h2><p class="muted">Open affected cards directly in Trello.</p>${checks.map(([n, f]) => { let a = C.filter(f); return `<details class="issue"><summary><span>${n}</span><span class="pill">${a.length}</span></summary>${a.map(c => `<div><a href="${esc(c.url)}" target="_blank">${esc(c.name)}</a><a href="${esc(c.url)}" target="_blank" style="float:right">Open in Trello ↗</a></div>`).join('')}</details>` }).join('')}</section>` }
 
 /* =========================================================
    JSON LOADING
@@ -326,6 +326,45 @@ render = function () {
             description.textContent = 'Funlab to update card details.';
         }
     });
+
+    const openTickets = C.filter(card => !DONE.includes(card.status));
+    const addMissingLine = (headingText, count, field) => {
+        const heading = [...app.querySelectorAll('h2')].find(element =>
+            element.textContent === headingText
+        );
+        if (!heading) return;
+
+        const existing = heading.nextElementSibling;
+        if (existing && existing.classList.contains('missing-exclusion')) {
+            existing.remove();
+        }
+
+        const line = document.createElement('p');
+        line.className = 'muted missing-exclusion';
+        line.innerHTML = `<b>${count}</b> ${count === 1 ? 'ticket' : 'tickets'} excluded due to missing ${esc(field)} data.`;
+        heading.insertAdjacentElement('afterend', line);
+    };
+
+    addMissingLine(
+        'Tickets by Type',
+        openTickets.filter(card => !card.t.length).length,
+        'ticket type'
+    );
+    addMissingLine(
+        'Ticket Type by milestone',
+        openTickets.filter(card => !card.t.length).length,
+        'ticket type'
+    );
+    addMissingLine(
+        'Tickets by Stream',
+        openTickets.filter(card => !card.s.length).length,
+        'stream'
+    );
+    addMissingLine(
+        'Tickets by Status',
+        openTickets.filter(card => card.status === 'Unknown').length,
+        'status'
+    );
 
     const ticketSection = sections.find(section => {
         const heading = section.querySelector('h2');
