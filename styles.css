@@ -174,18 +174,20 @@ body {
 
 /* =========================================================
    MILESTONE CARDS
-   Milestone headings, risk labels, and progress summaries
+   Milestone headings and progress summaries
 ========================================================= */
 .mile {
-    border-top: 12px solid var(--pink)
+    --mile-color: var(--pink);
+    border-top: 12px solid var(--mile-color);
+    padding: 16px
 }
 
 .mile:nth-child(2) {
-    border-top-color: var(--blue)
+    --mile-color: var(--blue)
 }
 
 .mile.bau {
-    border-top-color: var(--lime)
+    --mile-color: var(--lime)
 }
 
 .head {
@@ -196,7 +198,8 @@ body {
 }
 
 .head h2,
-.head h3 {
+.head h3,
+#app h2 {
     margin: 0;
     font-weight: 1000;
     letter-spacing: -.4px
@@ -228,10 +231,53 @@ body {
 }
 
 .score {
-    font-size: 44px;
+    font-size: 40px;
     font-weight: 1000;
-    margin-top: 12px;
-    letter-spacing: -2px
+    letter-spacing: -2px;
+    line-height: 1
+}
+
+#app h2 {
+    margin: 0 0 12px;
+    font-size: 1.17em;
+    text-transform: uppercase
+}
+
+.score {
+    margin-top: 8px
+}
+
+.milestone-dates {
+    display: grid;
+    gap: 5px;
+    margin-top: 10px
+}
+
+.milestone-dates > div {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 6px 9px;
+    background: #f7f7f7;
+    border-radius: 10px;
+    font-size: 14px
+}
+
+.milestone-date {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    white-space: nowrap
+}
+
+.milestone-dates b {
+    white-space: nowrap
+}
+
+.milestone-days {
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 700
 }
 
 /* =========================================================
@@ -250,25 +296,29 @@ body {
 .progress i {
     display: block;
     height: 100%;
-    background: linear-gradient(90deg, var(--pink), var(--yellow), var(--lime))
+    background: var(--mile-color)
 }
 
 .mini {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 8px;
-    margin-top: 15px
+    margin-top: 10px
+}
+
+.mini-progress {
+    grid-template-columns: repeat(2, 1fr)
 }
 
 .mini div {
     background: #f7f7f7;
     border: 1.5px solid var(--ink);
     border-radius: 12px;
-    padding: 9px
+    padding: 7px
 }
 
 .mini b {
-    font-size: 20px;
+    font-size: 18px;
     display: block;
     font-weight: 1000
 }
@@ -398,7 +448,22 @@ a {
 ========================================================= */
 @media(max-width:900px) {
     .summary {
-        grid-template-columns: 1fr 1fr
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 8px
+    }
+
+    .summary .metric {
+        min-width: 0;
+        padding: 12px 8px
+    }
+
+    .summary .metric b {
+        font-size: clamp(20px, 7vw, 28px)
+    }
+
+    .summary .metric span {
+        font-size: clamp(10px, 3vw, 12px);
+        line-height: 1.15
     }
 
     .cards,

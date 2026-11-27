@@ -19,12 +19,24 @@ const W = {
     '6. Verified & Communicated': 100
 };
 const COL = ['#ff2f92', '#2457ff', '#ffd400', '#7b2cff', '#00a878', '#c8ff00'];
+const MILESTONE_TIMELINES = {
+    'AU Rollout': [
+        { label: 'Go/No Go', date: '2027-01-18', displayDate: '18 Jan' },
+        { label: 'Go Live', date: '2027-02-04', displayDate: '4 Feb' }
+    ],
+    'USA Rollout': [
+        { label: 'UAT', date: '2027-02-04', displayDate: '4–17 Feb' },
+        { label: 'Go/No Go', date: '2027-02-18', displayDate: '18 Feb' },
+        { label: 'Go Live', date: '2027-03-09', displayDate: '9 Mar' }
+    ]
+};
 
 /* =========================================================
    DASHBOARD DATA
    Current board data, prepared cards, list order, and active filters
 ========================================================= */
 let D, C = [], ORDER = [], ss = [], ts = [], ys = [];
+let fileLastModified = null;
 
 const esc = s =>
     String(s || '').replace(/[&<>"']/g, m => ({
@@ -60,8 +72,9 @@ function priority(c) {
    DATA PREPARATION
    Convert the Trello board response into dashboard ticket data
 ========================================================= */
-function prep(d) {
+function prep(d, lastModified) {
     D = d;
+    fileLastModified = lastModified ? new Date(lastModified) : null;
     let L = Object.fromEntries((d.lists || []).map(x => [x.id, x.name]));
     ORDER = (d.lists || []).filter(x => !x.closed).map(x => x.name);
     C = (d.cards || [])
@@ -164,14 +177,37 @@ function bars(a, ord) {
    MILESTONE CARD RENDERING
    Create each milestone's progress and risk summary card
 ========================================================= */
+function sydneyToday() {
+    const parts = new Intl.DateTimeFormat('en-AU', {
+        timeZone: 'Australia/Sydney',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit'
+    }).formatToParts(new Date());
+    const date = Object.fromEntries(parts.map(part => [part.type, part.value]));
+    return Date.UTC(Number(date.year), Number(date.month) - 1, Number(date.day));
+}
+
+function milestoneDaysLeft(date, today = sydneyToday()) {
+    const days = (Date.parse(`${date}T00:00:00Z`) - today) / 86400000;
+    if (days < 0) return 'Passed';
+    return `${days} ${days === 1 ? 'day' : 'days'} left`;
+}
+
+function updateMilestoneDays() {
+    const today = sydneyToday();
+
+    app.querySelectorAll('[data-milestone-date]').forEach(element => {
+        element.textContent = milestoneDaysLeft(element.getAttribute('data-milestone-date'), today);
+    });
+}
+
 function card(n, a, b = false) {
     let prog = Math.round(a.reduce((z, c) => z + (W[c.status] ?? 0), 0) / Math.max(1, a.length));
     let rem = a.filter(c => !DONE.includes(c.status)).length;
-    let crit = a.filter(c => c.priority === 'Critical' && !DONE.includes(c.status)).length;
-    let r = crit >= 8 ? 'HIGH RISK' : crit >= 3 ? 'WATCH' : 'LOW RISK';
-    let cl = r === 'HIGH RISK' ? 'high' : r === 'WATCH' ? 'watch' : 'low';
+    let timeline = MILESTONE_TIMELINES[n];
 
-    return `<article class="box mile ${b ? 'bau' : ''}"><div class="head"><h3>${esc(n)}</h3><span class="risk ${cl}">${r}</span></div><div class="score">${prog}%</div><div class="muted">status-weighted progress</div><div class="progress"><i style="width:${prog}%"></i></div><div class="mini"><div><b>${a.length}</b>Total</div><div><b>${rem}</b>Remaining</div><div><b>${crit}</b>Critical open</div></div></article>`;
+    return `<article class="box mile ${b ? 'bau' : ''}"><div class="head"><h3>${esc(n)}</h3></div><div class="score">${prog}%</div><div class="muted">status-weighted progress</div><div class="progress"><i style="width:${prog}%"></i></div>${timeline ? `<div class="milestone-dates">${timeline.map(({ label, date, displayDate }) => `<div><span>${esc(label)}</span><span class="milestone-date"><b>${esc(displayDate)}</b><span class="milestone-days" data-milestone-date="${esc(date)}">${milestoneDaysLeft(date)}</span></span></div>`).join('')}</div>` : ''}<div class="mini ${timeline ? 'mini-progress' : ''}"><div><b>${a.length}</b>Total</div><div><b>${rem}</b>Remaining</div></div></article>`;
 }
 
 /* =========================================================
@@ -192,12 +228,67 @@ function render() { let complete = C.filter(c => DONE.includes(c.status)).length
    JSON LOADING
    Fetch the latest board data when the page loads or is refreshed
 ========================================================= */
+const renderDashboard = render;
+render = function () {
+    renderDashboard();
+    updateMilestoneDays();
+
+    const updatedAt = fileLastModified && !Number.isNaN(fileLastModified.getTime())
+        ? new Intl.DateTimeFormat('en-AU', {
+            day: 'numeric',
+            month: 'short',
+            year: 'numeric',
+            hour: 'numeric',
+            minute: '2-digit',
+            timeZone: 'Australia/Sydney',
+            timeZoneName: 'short'
+        }).format(fileLastModified)
+        : 'timestamp unavailable';
+    document.getElementById('updated').textContent = 'Data last updated: ' + updatedAt;
+
+    const sections = [...app.querySelectorAll('section.box')];
+    const headingRenames = new Map([
+        ['What kind of work remains?', 'Tickets by Type'],
+        ['Where is the work?', 'Tickets by Stream'],
+        ['Where is the work in the process?', 'Tickets by Status'],
+        ['Delivery risk by milestone', 'Priority by Milestone'],
+        ['Data quality actions', 'Tickets Missing Details']
+    ]);
+
+    sections.forEach(section => {
+        const heading = section.querySelector('h2');
+        if (heading && headingRenames.has(heading.textContent)) {
+            heading.textContent = headingRenames.get(heading.textContent);
+        }
+
+        const description = section.querySelector('p.muted');
+        if (description && description.textContent === 'Open work only · milestone × priority.') {
+            description.textContent = 'Open work only';
+        }
+        if (description && description.textContent === 'Open affected cards directly in Trello.') {
+            description.textContent = 'Funlab to update card details.';
+        }
+    });
+
+    const ticketSection = sections.find(section => {
+        const heading = section.querySelector('h2');
+        return heading && heading.textContent === 'Tickets by Type';
+    });
+    const riskSection = sections.find(section => {
+        const heading = section.querySelector('h2');
+        return heading && heading.textContent === 'Priority by Milestone';
+    });
+
+    riskSection.parentNode.insertBefore(ticketSection, riskSection);
+};
+
 async function load() {
     notice.style.display = 'none';
     try {
         let r = await fetch(URL + '?v=' + Date.now(), { cache: 'no-store' });
         if (!r.ok) throw Error(r.status);
-        prep(await r.json());
+        const data = await r.json();
+        prep(data, r.headers.get('Last-Modified'));
     } catch (e) {
         /* =========================================================
            ERROR HANDLING
@@ -209,3 +300,4 @@ async function load() {
 }
 
 load();
+setInterval(updateMilestoneDays, 60 * 1000);
