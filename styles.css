@@ -91,6 +91,18 @@ body {
     color: var(--muted)
 }
 
+.missing-exclusion {
+    display: inline-block;
+    margin: 8px 0 12px;
+    padding: 6px 10px;
+    border: 2px solid var(--ink);
+    border-radius: 99px;
+    background: var(--yellow);
+    color: var(--ink);
+    font-size: 13px;
+    font-weight: 1000;
+}
+
 .hero .muted {
     color: #f3f3f3
 }
