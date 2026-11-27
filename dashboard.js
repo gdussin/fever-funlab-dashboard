@@ -202,6 +202,19 @@ function updateMilestoneDays() {
     });
 }
 
+function updateMissingOwnerActions() {
+    const section = [...app.querySelectorAll('details.issue')].find(details =>
+        details.querySelector('summary span').textContent === 'Missing Owner'
+    );
+    const cards = C.filter(card => !DONE.includes(card.status) && !card.owners.length);
+
+    section.querySelector('.pill').textContent = cards.length;
+    section.querySelectorAll('div').forEach(row => row.remove());
+    section.insertAdjacentHTML('beforeend', cards.map(card =>
+        `<div><a href="${esc(card.url)}" target="_blank">${esc(card.name)}</a><a href="${esc(card.url)}" target="_blank" style="float:right">Open in Trello ↗</a></div>`
+    ).join(''));
+}
+
 function card(n, a, b = false) {
     let prog = Math.round(a.reduce((z, c) => z + (W[c.status] ?? 0), 0) / Math.max(1, a.length));
     let rem = a.filter(c => !DONE.includes(c.status)).length;
@@ -232,6 +245,7 @@ const renderDashboard = render;
 render = function () {
     renderDashboard();
     updateMilestoneDays();
+    updateMissingOwnerActions();
 
     const updatedAt = fileLastModified && !Number.isNaN(fileLastModified.getTime())
         ? new Intl.DateTimeFormat('en-AU', {
